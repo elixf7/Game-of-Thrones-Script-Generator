@@ -59,8 +59,63 @@ idx_to_char = np.array(vocab)
 text_as_int = np.array([char_to_idx[c] for c in text])
 ```
 
-Next I created the `input_text` and `target_text` variables which are misaligned by one character. This is necessary so that the model can be trained to predict the next character in the sequence. For instance, if the input is **Hello World**, then the output would be **ello World!**. As you can see, at index 0 the input is **H** and the output is **e**. So, the model is being trained to ouput an e after the H. 
+Next I created the `input_text` and `target_text` variables which are misaligned by one character. This is necessary so that the model can be trained to predict the next character in the sequence. For instance, if the input is **Hello World**, then the output would be **ello World!**. As you can see, at index 0 the input is **H** and the output is **e**. So, the model is being trained to ouput an e after the H. Each character in the input sequence is mapped to the appropriate target character for quick acess. I then shuffled the input and target sequences in the dataset to get more diverse training of the model. Basically, the script is no longer in order, it is made up of shuffled lines of 100 characters. 
 
 ### Building the Model
+There are many types of nueral networks to choose from, but for this project the clear best choice was a Recurrent Neural Network. RNNs are a great choice for creating text because they can remember what came before and use that information in thier predictions unlike normal neural netowrks. This makes them better at understanding the order and connection between words in a sentence or a paragraph. So, when RNNs generate text, they can use this memory to make the text sound more natural and meaningful. RNNs are often used for tasks like writing and completing sentences which is very similar to the goal of this project. 
 
+I first set a batch size of 64 which means the model will update its weights after 64 predictions. I also chose the number of recurrent neural network units as 512. The more of these you have the more complex your model will be, however runtime will also go up. I had to move it down from 1024 for this reason, but more units should yeild a better result. The ouptut layer is a dense layer with a size equal to the number of unique characters. The `glorot_uniform` initializer means that the ouptut will also be a probability distribution with a float value assigned to each character based on the likelyhood the model beleives it comes next. 
+```
+vocab_size = len(vocab)
+embedding_dim = 256
+rnn_units = 512
+
+def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
+    model = tf.keras.Sequential([
+    tf.keras.layers.Embedding(vocab_size, embedding_dim,
+                              batch_input_shape=[batch_size, None]),
+    # Recurrent NN architechture
+    tf.keras.layers.GRU(rnn_units,
+                        return_sequences=True,
+                        stateful=True,
+                        recurrent_initializer='glorot_uniform'),
+    tf.keras.layers.Dense(vocab_size)
+  ])
+    return model
+```
+When training the model I used categorical crossentropy to compute the loss, and the `adam` optimizer to adjust the weights. The code and a graph depicting the loss over each epoch is shown below. 
+```
+def loss(labels, logits):
+    return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits = True )
+model.compile(optimizer = 'adam', loss = loss)
+```
+### Results
+
+I designed a simple function that takes in a seed (up to 100 chars long), and then uses this seed to start predicting text. The amount of text generated can be adjusted. I also chose a temperature of .9. The `temperature` variable will change the "riskiness" of the model in how it chooses the next character. For instance, if the temperature is 1 the model will always choose the highest probability character. But if it is lower at say .2, it will be very random in what character it chooses. If overfitting or lack of diversity is an issue, this value should be lowered. Here is an example call of the `predict_text` function:
+```
+gen_length = 1000
+temperature = .9
+seed = "The White Walkers are coming, do we fight or do we run?"
+print(predict_text(model, gen_length, temperature, seed))
+```
+**And here is an example of an ouput:**
+
+*The White Walkers are coming, do we fight or do we run?
+MISSANDEI: (speaks Valyrian)*
+
+*MARGAERY: He couldn't dicleplace it, corred for the Seven Kingdoms.  There has no emergestand.  Can we your father again. A man who divides his kwill placed in the courtyard and pleased and pulls the tie love to able the Dothraki banner in the anch as the village is not. I suppose that's wrong. You sit or do you were men. And words in the key, but the world was when does she return.*
+
+*LITTLEFINGER: I will make it to Casterly Rock. Hodor captured his money gription.  A shadow in the surviving continues.*
+
+*BRYNDEN shufts the stoly high to rule in this side standing away.*
+
+*JAIME: I am the beach us in the hall. CERSEI and VALYNE exchange  DOLOROUS EDD and PODRICK enter.*
+
+*MARGAERY: You won't march on Tarth as two people always care about. And I don't have.*
+
+*MELISANDRE: I was Gilly do you think she's yours.  Everyone who sut the seclet with the marketplace outside the Mountain. It heads from the way, I need you to come with me. I don't think that.*
+
+*EURON she laws, talls*
+
+As you can see, the results do not make a lot of sense. However, considering this specific example was generated after only a few hours of training on a slimmed down model (so my laptop did't explode), I think these are quite decent results. There are a lot of fun characters, mentions of places in GOT, and most words are spelled correctly. With more training, I think this model would be considerealby more accurate. 
 
