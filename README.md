@@ -5,11 +5,12 @@ This README is an outline of the steps taken to create this project. More detail
 
 ### Overview
 1. Introduction
-2. Processing the Text
+2. Loading the Text
 3. Analyzing the Script
-4. Building the Model
-5. Results
-6. Future Additions
+4. Processing the Characters
+5. Building the Model
+6. Results
+7. Future Additions
 
 
 ### Introduction
@@ -19,7 +20,7 @@ In addition to training the model on all 8 seasons of script, I added a feature 
 
 More information about the series can be found on the [Game of Thrones Wikipedia](https://en.wikipedia.org/wiki/Game_of_Thrones)
 
-### Processing the Text
+### Loading the Text
 The first step was to combine all of the individual episode txt files into a single txt file that could be read. The following code segment acheives this and stores the result in **merged_file.txt** for easier acess.
 
 ```
@@ -37,4 +38,29 @@ The next step was to remove any unnecary characters such as the carriage return 
 
 ### Analyzing the Script
 The enitre GOT script is 2,474,457 characters long with 95 unique characters after removing the symbols descirbed above. this is a very robust amount of data that will make training the model easier and less likely to overfit. 
+
+I then separated the script into lines by specific characters. To do this, I had to solve several challenges:
+1. How to tell if a line is dialog or just setting a scene
+2. How to differentiate a character name and a word
+3. Count the number of lines per character, and store these lines elsewhere
+
+This was done by recognizing all character dialog starts with the character name in all caps followed by a semicolon. For example: **CERCEI: I love my children**
+I was then able to iterate over each line storing the characters in a `name` variable. I stopped storing characters once I encountered a semicolon, and cleared the name variable if I reached the end of the line. Furthermore, to fix encountering a semicolon in normal dialog, I cleared the name variable once the string was 20 characters long (since nobody has a name that long). I then stored the line in a dictionary with the key being the name variable, and the value being a concatenated string of all the character lines. Even after some more tranformations (detailed in the code), the final dictionary still had some keys that were not people in the show. One example is **EXT** which means "exit" in the script. These few mistakes were removed manually.
+
+The final dictionary was converted to a list and sorted in descending order. Characters below a specified threshold of lines were dropped. The results were plotted as seen in the graph below. To my suprise Tyrion had the most lines in the series by far!
+
+### Processing the Characters
+A simple but important step in the process is to assign a numerical index to each unique character in the text. Since the script had 95 unique characters, each of these was given a number in the range 0-94. For instance the letter 'a' is represented by a 56 in this case. Then the entire text can be converted to an array of numbers instead of a long string. This is important for training the model.
+
+Also, a sequence length of 100 was chosen. This simply means that the model will have 100 characters of previous context when it is trying to predict the next letter. The text therefore has to be split up into chunks of 100 characters each which I did. 
+```
+char_to_idx = dict((c, i) for i, c in enumerate(vocab))
+idx_to_char = np.array(vocab)
+text_as_int = np.array([char_to_idx[c] for c in text])
+```
+
+Next I created the `input_text` and `target_text` variables which are misaligned by one character. This is necessary so that the model can be trained to predict the next character in the sequence. For instance, if the input is **Hello World**, then the output would be **ello World!**. As you can see, at index 0 the input is **H** and the output is **e**. So, the model is being trained to ouput an e after the H. 
+
+### Building the Model
+
 
