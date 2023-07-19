@@ -21,7 +21,7 @@ In addition to training the model on all 8 seasons of script, I added a feature 
 More information about the series can be found on the [Game of Thrones Wikipedia](https://en.wikipedia.org/wiki/Game_of_Thrones)
 
 ### Loading the Text
-The first step was to combine all of the individual episode txt files into a single txt file that could be read. The following code segment acheives this and stores the result in **merged_file.txt** for easier acess.
+The first step was to combine all of the individual episode txt files into a single txt file that could be read. The following code segment achieves this and stores the result in **merged_file.txt** for easier access.
 
 ```
 inputs = []
@@ -34,18 +34,22 @@ with open('merged_file.txt', 'w') as outfile:
         with open(fname, encoding="utf-8", errors='ignore') as infile:
             outfile.write(infile.read())
 ```
-The next step was to remove any unnecary characters such as the carriage return "\r" and tabs"\t" and to strip the whitespace from the ends of each line in the file. This way the model will not be trained to produce excess whitespace. 
+The next step was to remove any unnecessary characters such as the carriage return "\r" and tabs"\t" and to strip the whitespace from the ends of each line in the file. This way the model will not be trained to produce excess whitespace. 
 
 ### Analyzing the Script
-The enitre GOT script is 2,474,457 characters long with 95 unique characters after removing the symbols descirbed above. this is a very robust amount of data that will make training the model easier and less likely to overfit. 
+The entire GOT script is 2,474,457 characters long with 95 unique characters after removing the symbols described above. This is a very robust amount of data that will make training the model easier and less likely to overfit. 
 
 I then separated the script into lines by specific characters. To do this, I had to solve several challenges:
 1. How to tell if a line is dialog or just setting a scene
 2. How to differentiate a character name and a word
 3. Count the number of lines per character, and store these lines elsewhere
 
-This was done by recognizing all character dialog starts with the character name in all caps followed by a semicolon. For example: **CERCEI: I love my children**
-I was then able to iterate over each line storing the characters in a `name` variable. I stopped storing characters once I encountered a semicolon, and cleared the name variable if I reached the end of the line. Furthermore, to fix encountering a semicolon in normal dialog, I cleared the name variable once the string was 20 characters long (since nobody has a name that long). I then stored the line in a dictionary with the key being the name variable, and the value being a concatenated string of all the character lines. Even after some more tranformations (detailed in the code), the final dictionary still had some keys that were not people in the show. One example is **EXT** which means "exit" in the script. These few mistakes were removed manually.
+This was done by recognizing all character dialog starts with the character name in all caps followed by a semicolon. For example: 
+
+**CERCEI: I love my children**
+
+
+I was then able to iterate over each line storing the characters in a `name` variable. I stopped storing characters once I encountered a semicolon, and cleared the name variable if I reached the end of the line. Furthermore, to fix encountering a semicolon in normal dialog, I cleared the name variable once the string was 20 characters long (since nobody has a name that long). I then stored the line in a dictionary with the key being the name variable, and the value being a concatenated string of all the character lines. Even after some more transformations (detailed in the code), the final dictionary still had some keys that were not people in the show. One example is **EXT** which means "exit" in the script. These few mistakes were removed manually.
 
 The final dictionary was converted to a list and sorted in descending order. Characters below a specified threshold of lines were dropped. The results were plotted as seen in the graph below. To my suprise Tyrion had the most lines in the series by far!
 
@@ -61,12 +65,12 @@ idx_to_char = np.array(vocab)
 text_as_int = np.array([char_to_idx[c] for c in text])
 ```
 
-Next I created the `input_text` and `target_text` variables which are misaligned by one character. This is necessary so that the model can be trained to predict the next character in the sequence. For instance, if the input is **Hello World**, then the output would be **ello World!**. As you can see, at index 0 the input is **H** and the output is **e**. So, the model is being trained to ouput an e after the H. Each character in the input sequence is mapped to the appropriate target character for quick acess. I then shuffled the input and target sequences in the dataset to get more diverse training of the model. Basically, the script is no longer in order, it is made up of shuffled lines of 100 characters. 
+Next I created the `input_text` and `target_text` variables which are misaligned by one character. This is necessary so that the model can be trained to predict the next character in the sequence. For instance, if the input is **Hello World**, then the output would be **ello World!**. As you can see, at index 0 the input is **H** and the output is **e**. So, the model is being trained to output an e after the H. Each character in the input sequence is mapped to the appropriate target character for quick access. I then shuffled the input and target sequences in the dataset to get more diverse training of the model. Basically, the script is no longer in order, it is made up of shuffled lines of 100 characters. 
 
 ### Building the Model
-There are many types of nueral networks to choose from, but for this project the clear best choice was a Recurrent Neural Network. RNNs are a great choice for creating text because they can remember what came before and use that information in thier predictions unlike normal neural netowrks. This makes them better at understanding the order and connection between words in a sentence or a paragraph. So, when RNNs generate text, they can use this memory to make the text sound more natural and meaningful. RNNs are often used for tasks like writing and completing sentences which is very similar to the goal of this project. 
+There are many types of neural networks to choose from, but for this project the clear best choice was a Recurrent Neural Network. RNNs are a great choice for creating text because they can remember what came before and use that information in their predictions unlike normal neural networks. This makes them better at understanding the order and connection between words in a sentence or a paragraph. So, when RNNs generate text, they can use this memory to make the text sound more natural and meaningful. RNNs are often used for tasks like writing and completing sentences which is very similar to the goal of this project. 
 
-I first set a batch size of 64 which means the model will update its weights after 64 predictions. I also chose the number of recurrent neural network units as 512. The more of these you have the more complex your model will be, however runtime will also go up. I had to move it down from 1024 for this reason, but more units should yeild a better result. The ouptut layer is a dense layer with a size equal to the number of unique characters. The `glorot_uniform` initializer means that the ouptut will also be a probability distribution with a float value assigned to each character based on the likelyhood the model beleives it comes next. 
+I first set a batch size of 64 which means the model will update its weights after 64 predictions. I also chose the number of recurrent neural network units as 512. The more of these you have the more complex your model will be, however runtime will also go up. I had to move it down from 1024 for this reason, but more units should yield a better result. The output layer is a dense layer with a size equal to the number of unique characters. The `glorot_uniform` initializer means that the output will also be a probability distribution with a float value assigned to each character based on the likelihood the model believes it comes next. 
 ```
 vocab_size = len(vocab)
 embedding_dim = 256
@@ -76,7 +80,7 @@ def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
     model = tf.keras.Sequential([
     tf.keras.layers.Embedding(vocab_size, embedding_dim,
                               batch_input_shape=[batch_size, None]),
-    # Recurrent NN architechture
+    # Recurrent NN architecture
     tf.keras.layers.GRU(rnn_units,
                         return_sequences=True,
                         stateful=True,
@@ -85,7 +89,7 @@ def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
   ])
     return model
 ```
-When training the model I used categorical crossentropy to compute the loss, and the `adam` optimizer to adjust the weights. The code and a graph depicting the loss over each epoch is shown below. 
+When training the model I used categorical cross entropy to compute the loss, and the `adam` optimizer to adjust the weights. The code and a graph depicting the loss over each epoch is shown below. 
 ```
 def loss(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits = True )
@@ -102,7 +106,7 @@ temperature = .9
 seed = "The White Walkers are coming, do we fight or do we run?"
 print(predict_text(model, gen_length, temperature, seed))
 ```
-**And here is an example of an ouput:**
+**And here is an example of an output:**
 
 *The White Walkers are coming, do we fight or do we run?
 MISSANDEI: (speaks Valyrian)*
@@ -121,5 +125,6 @@ MISSANDEI: (speaks Valyrian)*
 
 *EURON she laws, talls*
 
-As you can see, the results do not make a lot of sense. However, considering this specific example was generated after only a few hours of training on a slimmed down model (so my laptop did't explode), I think these are quite decent results. There are a lot of fun characters, mentions of places in GOT, and most words are spelled correctly. With more training, I think this model would be considerealby more accurate. 
+As you can see, the results do not make a lot of sense. However, considering this specific example was generated after only a few hours of training on a slimmed down model (so my laptop didn't explode), I think these are quite decent results. There are a lot of fun characters, mentions of places in GOT, and most words are spelled correctly. With more training, I think this model would be considerably more accurate. 
+
 
