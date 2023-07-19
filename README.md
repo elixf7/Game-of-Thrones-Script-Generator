@@ -49,6 +49,8 @@ I was then able to iterate over each line storing the characters in a `name` var
 
 The final dictionary was converted to a list and sorted in descending order. Characters below a specified threshold of lines were dropped. The results were plotted as seen in the graph below. To my suprise Tyrion had the most lines in the series by far!
 
+![My Image](images/my-image.jpg)
+
 ### Processing the Characters
 A simple but important step in the process is to assign a numerical index to each unique character in the text. Since the script had 95 unique characters, each of these was given a number in the range 0-94. For instance the letter 'a' is represented by a 56 in this case. Then the entire text can be converted to an array of numbers instead of a long string. This is important for training the model.
 
