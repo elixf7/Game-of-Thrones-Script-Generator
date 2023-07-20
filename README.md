@@ -128,4 +128,22 @@ MISSANDEI: (speaks Valyrian)*
 
 As you can see, the results do not make a lot of sense. However, considering this specific example was generated after only a few hours of training on a slimmed down model (so my laptop didn't explode), I think these are quite decent results. There are a lot of fun characters, mentions of places in GOT, and most words are spelled correctly. With more training, I think this model would be considerably more accurate. 
 
+**Below is an example of an output only trained on Tyrion's lines in the show (17 epochs):**
+
+*The White Walkers are coming, do we fight or do we run?  All of them and you have a compliment, my lord. Has to leave? Oh, you have a crimed and your sword to please put the family less are wealth.  children true worse.  They’re entirely danying me, Pod, have you started coming. Well, want to she was anything brother. The impregness after as we you? There's no kind of father. No. What is there and a hand in coming to again? And the most possesses, Evhookedory om this few we'r all away in for you. And you can join us. Jusmine cloth at least. The proud Lord of the Around. Let's I seem to be we upout you wo deep luck for now of him in the world. I are their serviced catch as I can't. That's why Grey Worm and the other half a look with the high toice. Wish outside my closest plan on a dognt. It's the enemy spoken in the walls. It's not enough. They'll come someone who's never off to believe you? Dod Can Kingdoms and I know she will you important thing so him. I was wrong. One table, this is charge of the capital. They realize some of woman?*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
