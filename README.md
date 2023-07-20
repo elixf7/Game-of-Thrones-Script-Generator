@@ -58,12 +58,13 @@ The final dictionary was converted to a list and sorted in descending order. Cha
 ### Processing the Characters
 A simple but important step in the process is to assign a numerical index to each unique character in the text. Since the script had 95 unique characters, each of these was given a number in the range 0-94. For instance the letter 'a' is represented by a 56 in this case. Then the entire text can be converted to an array of numbers instead of a long string. This is important for training the model.
 
-Also, a sequence length of 100 was chosen. This simply means that the model will have 100 characters of previous context when it is trying to predict the next letter. The text therefore has to be split up into chunks of 100 characters each which I did. 
 ```
 char_to_idx = dict((c, i) for i, c in enumerate(vocab))
 idx_to_char = np.array(vocab)
 text_as_int = np.array([char_to_idx[c] for c in text])
 ```
+
+Also, a sequence length of 100 was chosen. This simply means that the model will have 100 characters of previous context when it is trying to predict the next letter. The text therefore has to be split up into chunks of 100 characters each which I did. 
 
 Next I created the `input_text` and `target_text` variables which are misaligned by one character. This is necessary so that the model can be trained to predict the next character in the sequence. For instance, if the input is **Hello World**, then the output would be **ello World!**. As you can see, at index 0 the input is **H** and the output is **e**. So, the model is being trained to output an e after the H. Each character in the input sequence is mapped to the appropriate target character for quick access. I then shuffled the input and target sequences in the dataset to get more diverse training of the model. Basically, the script is no longer in order, it is made up of shuffled lines of 100 characters. 
 
